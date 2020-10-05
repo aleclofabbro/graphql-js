@@ -97,14 +97,14 @@ import {
  */
 export type ExecutionContext = {|
   schema: GraphQLSchema,
-  fragments: ObjMap<FragmentDefinitionNode>,
-  rootValue: mixed,
-  contextValue: mixed,
-  operation: OperationDefinitionNode,
-  variableValues: { [variable: string]: mixed, ... },
-  fieldResolver: GraphQLFieldResolver<any, any>,
-  typeResolver: GraphQLTypeResolver<any, any>,
-  errors: Array<GraphQLError>,
+    fragments: ObjMap < FragmentDefinitionNode >,
+      rootValue: mixed,
+        contextValue: mixed,
+          operation: OperationDefinitionNode,
+            variableValues: { [variable: string]: mixed, ... },
+fieldResolver: GraphQLFieldResolver < any, any >,
+  typeResolver: GraphQLTypeResolver < any, any >,
+    errors: Array < GraphQLError >,
 |};
 
 /**
@@ -115,26 +115,26 @@ export type ExecutionContext = {|
  *   - `extensions` is reserved for adding non-standard properties.
  */
 export type ExecutionResult = {|
-  errors?: $ReadOnlyArray<GraphQLError>,
-  data?: ObjMap<mixed> | null,
-  extensions?: ObjMap<mixed>,
+  errors?: $ReadOnlyArray < GraphQLError >,
+    data ?: ObjMap<mixed> | null,
+      extensions ?: ObjMap < mixed >,
 |};
 
 export type FormattedExecutionResult = {|
-  errors?: $ReadOnlyArray<GraphQLFormattedError>,
-  data?: ObjMap<mixed> | null,
-  extensions?: ObjMap<mixed>,
+  errors?: $ReadOnlyArray < GraphQLFormattedError >,
+    data ?: ObjMap<mixed> | null,
+      extensions ?: ObjMap < mixed >,
 |};
 
 export type ExecutionArgs = {|
   schema: GraphQLSchema,
-  document: DocumentNode,
-  rootValue?: mixed,
-  contextValue?: mixed,
-  variableValues?: ?{ +[variable: string]: mixed, ... },
-  operationName?: ?string,
-  fieldResolver?: ?GraphQLFieldResolver<any, any>,
-  typeResolver?: ?GraphQLTypeResolver<any, any>,
+    document: DocumentNode,
+      rootValue ?: mixed,
+      contextValue ?: mixed,
+      variableValues ?: ? { + [variable: string] : mixed, ... },
+operationName ?: ? string,
+  fieldResolver ?: ? GraphQLFieldResolver < any, any >,
+  typeResolver ?: ? GraphQLTypeResolver < any, any >,
 |};
 
 /**
@@ -160,9 +160,9 @@ declare function execute(
   rootValue?: mixed,
   contextValue?: mixed,
   variableValues?: ?{ +[variable: string]: mixed, ... },
-  operationName?: ?string,
-  fieldResolver?: ?GraphQLFieldResolver<any, any>,
-  typeResolver?: ?GraphQLTypeResolver<any, any>,
+operationName ?: ? string,
+  fieldResolver ?: ? GraphQLFieldResolver < any, any >,
+  typeResolver ?: ? GraphQLTypeResolver < any, any >,
 ): PromiseOrValue<ExecutionResult>;
 export function execute(
   argsOrSchema,
@@ -179,15 +179,15 @@ export function execute(
   return arguments.length === 1
     ? executeImpl(argsOrSchema)
     : executeImpl({
-        schema: argsOrSchema,
-        document,
-        rootValue,
-        contextValue,
-        variableValues,
-        operationName,
-        fieldResolver,
-        typeResolver,
-      });
+      schema: argsOrSchema,
+      document,
+      rootValue,
+      contextValue,
+      variableValues,
+      operationName,
+      fieldResolver,
+      typeResolver,
+    });
 }
 
 /**
@@ -285,7 +285,7 @@ export function assertValidExecutionArguments(
   // Variables, if provided, must be an object.
   devAssert(
     rawVariableValues == null || isObjectLike(rawVariableValues),
-    'Variables must be provided as an Object where each property is a variable value. Perhaps look to see if an unparsed JSON string was provided.',
+  'Variables must be provided as an Object where each property is a variable value. Perhaps look to see if an unparsed JSON string was provided.',
   );
 }
 
@@ -303,66 +303,66 @@ export function buildExecutionContext(
   rootValue: mixed,
   contextValue: mixed,
   rawVariableValues: ?{ +[variable: string]: mixed, ... },
-  operationName: ?string,
-  fieldResolver: ?GraphQLFieldResolver<mixed, mixed>,
-  typeResolver?: ?GraphQLTypeResolver<mixed, mixed>,
+operationName: ? string,
+  fieldResolver: ?GraphQLFieldResolver < mixed, mixed >,
+    typeResolver ?: ? GraphQLTypeResolver < mixed, mixed >,
 ): $ReadOnlyArray<GraphQLError> | ExecutionContext {
   let operation: OperationDefinitionNode | void;
   const fragments: ObjMap<FragmentDefinitionNode> = Object.create(null);
-  for (const definition of document.definitions) {
-    switch (definition.kind) {
-      case Kind.OPERATION_DEFINITION:
-        if (operationName == null) {
-          if (operation !== undefined) {
-            return [
-              new GraphQLError(
-                'Must provide operation name if query contains multiple operations.',
-              ),
-            ];
-          }
-          operation = definition;
-        } else if (definition.name?.value === operationName) {
-          operation = definition;
+  for(const definition of document.definitions) {
+  switch (definition.kind) {
+    case Kind.OPERATION_DEFINITION:
+      if (operationName == null) {
+        if (operation !== undefined) {
+          return [
+            new GraphQLError(
+              'Must provide operation name if query contains multiple operations.',
+            ),
+          ];
         }
-        break;
-      case Kind.FRAGMENT_DEFINITION:
-        fragments[definition.name.value] = definition;
-        break;
-    }
+        operation = definition;
+      } else if (definition.name?.value === operationName) {
+        operation = definition;
+      }
+      break;
+    case Kind.FRAGMENT_DEFINITION:
+      fragments[definition.name.value] = definition;
+      break;
   }
+}
 
-  if (!operation) {
-    if (operationName != null) {
-      return [new GraphQLError(`Unknown operation named "${operationName}".`)];
-    }
-    return [new GraphQLError('Must provide an operation.')];
+if (!operation) {
+  if (operationName != null) {
+    return [new GraphQLError(`Unknown operation named "${operationName}".`)];
   }
+  return [new GraphQLError('Must provide an operation.')];
+}
 
-  // istanbul ignore next (See: 'https://github.com/graphql/graphql-js/issues/2203')
-  const variableDefinitions = operation.variableDefinitions ?? [];
+// istanbul ignore next (See: 'https://github.com/graphql/graphql-js/issues/2203')
+const variableDefinitions = operation.variableDefinitions ?? [];
 
-  const coercedVariableValues = getVariableValues(
-    schema,
-    variableDefinitions,
-    rawVariableValues ?? {},
-    { maxErrors: 50 },
-  );
+const coercedVariableValues = getVariableValues(
+  schema,
+  variableDefinitions,
+  rawVariableValues ?? {},
+  { maxErrors: 50 },
+);
 
-  if (coercedVariableValues.errors) {
-    return coercedVariableValues.errors;
-  }
+if (coercedVariableValues.errors) {
+  return coercedVariableValues.errors;
+}
 
-  return {
-    schema,
-    fragments,
-    rootValue,
-    contextValue,
-    operation,
-    variableValues: coercedVariableValues.coerced,
-    fieldResolver: fieldResolver ?? defaultFieldResolver,
-    typeResolver: typeResolver ?? defaultTypeResolver,
-    errors: [],
-  };
+return {
+  schema,
+  fragments,
+  rootValue,
+  contextValue,
+  operation,
+  variableValues: coercedVariableValues.coerced,
+  fieldResolver: fieldResolver ?? defaultFieldResolver,
+  typeResolver: typeResolver ?? defaultTypeResolver,
+  errors: [],
+};
 }
 
 /**
@@ -790,7 +790,8 @@ function completeValue(
       path,
       result,
     );
-    if (completed === null) {
+    const skipNonNullValueChecks = Boolean(exeContext && exeContext.contextValue && exeContext.contextValue.skipNonNullValueChecks === true)
+    if (completed === null && !skipNonNullValueChecks) {
       throw new Error(
         `Cannot return null for non-nullable field ${info.parentType.name}.${info.fieldName}.`,
       );
@@ -851,7 +852,7 @@ function completeValue(
   invariant(
     false,
     'Cannot complete value of unexpected output type: ' +
-      inspect((returnType: empty)),
+    inspect((returnType: empty)),
   );
 }
 
@@ -937,7 +938,7 @@ function completeLeafValue(returnType: GraphQLLeafType, result: mixed): mixed {
   if (serializedResult === undefined) {
     throw new Error(
       `Expected a value of type "${inspect(returnType)}" but ` +
-        `received: ${inspect(result)}`,
+      `received: ${inspect(result)}`,
     );
   }
   return serializedResult;
@@ -1019,7 +1020,7 @@ function ensureValidRuntimeType(
   if (typeof runtimeTypeName !== 'string') {
     throw new GraphQLError(
       `Abstract type "${returnType.name}" must resolve to an Object type at runtime for field "${info.parentType.name}.${info.fieldName}" with ` +
-        `value ${inspect(result)}, received "${inspect(runtimeTypeOrName)}".`,
+      `value ${inspect(result)}, received "${inspect(runtimeTypeOrName)}".`,
     );
   }
 
@@ -1203,16 +1204,16 @@ export const defaultTypeResolver: GraphQLTypeResolver<mixed, mixed> = function (
 export const defaultFieldResolver: GraphQLFieldResolver<
   mixed,
   mixed,
-> = function (source: any, args, contextValue, info) {
-  // ensure source is a value for which property access is acceptable.
-  if (isObjectLike(source) || typeof source === 'function') {
-    const property = source[info.fieldName];
-    if (typeof property === 'function') {
-      return source[info.fieldName](args, contextValue, info);
+  > = function (source: any, args, contextValue, info) {
+    // ensure source is a value for which property access is acceptable.
+    if (isObjectLike(source) || typeof source === 'function') {
+      const property = source[info.fieldName];
+      if (typeof property === 'function') {
+        return source[info.fieldName](args, contextValue, info);
+      }
+      return property;
     }
-    return property;
-  }
-};
+  };
 
 /**
  * This method looks up the field on the given type definition.
